@@ -2,22 +2,14 @@ import os
 import requests
 
 
-BOT_TOKEN = os.getenv(
-    "BOT_TOKEN"
-)
-
-CHAT_ID = os.getenv(
-    "CHAT_ID"
-)
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 
 
 def send_message(text):
 
-    url = (
-        f"https://api.telegram.org/"
-        f"bot{BOT_TOKEN}/sendMessage"
-    )
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
 
     requests.post(
@@ -33,10 +25,7 @@ def send_message(text):
 
 def send_photo(photo, caption):
 
-    url = (
-        f"https://api.telegram.org/"
-        f"bot{BOT_TOKEN}/sendPhoto"
-    )
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
 
 
     requests.post(
@@ -53,10 +42,7 @@ def send_photo(photo, caption):
 
 def send_video(video, caption):
 
-    url = (
-        f"https://api.telegram.org/"
-        f"bot{BOT_TOKEN}/sendVideo"
-    )
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendVideo"
 
 
     requests.post(
@@ -74,7 +60,7 @@ def send_video(video, caption):
 def send_tweet(tweet):
 
 
-    text = (
+    caption = (
         f"🏎 <b>{tweet['user']}</b>\n\n"
         f"{tweet['text']}\n\n"
         f"🔗 {tweet['url']}"
@@ -90,26 +76,33 @@ def send_tweet(tweet):
     if not media:
 
         send_message(
-            text
+            caption
+        )
+
+        return
+
+
+
+    first = media[0]
+
+
+    # تشخیص واقعی ویدیو
+
+    if (
+        "video.twimg.com" in first
+        or
+        ".mp4" in first
+    ):
+
+        send_video(
+            first,
+            caption
         )
 
 
     else:
 
-
-        first = media[0]
-
-
-        if "video" in first:
-
-            send_video(
-                first,
-                text
-            )
-
-        else:
-
-            send_photo(
-                first,
-                text
-            )
+        send_photo(
+            first,
+            caption
+        )
