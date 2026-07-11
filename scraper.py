@@ -1,4 +1,5 @@
-import snscrape.modules.twitter as sntwitter
+import requests
+from bs4 import BeautifulSoup
 
 
 accounts = [
@@ -8,27 +9,54 @@ accounts = [
 ]
 
 
+headers = {
+    "User-Agent":
+    "Mozilla/5.0"
+}
+
+
 for account in accounts:
 
     print("\nChecking:", account)
 
 
-    scraper = sntwitter.TwitterUserScraper(
-        account
+    url = f"https://x.com/{account}"
+
+
+    response = requests.get(
+        url,
+        headers=headers,
+        timeout=20
     )
 
 
-    for tweet in scraper.get_items():
-
-        print("----------------")
-
-        print(tweet.date)
-
-        print(tweet.user.username)
-
-        print(tweet.content)
-
-        print(tweet.url)
+    print(
+        "Status:",
+        response.status_code
+    )
 
 
-        break
+    if response.status_code == 200:
+
+        soup = BeautifulSoup(
+            response.text,
+            "lxml"
+        )
+
+
+        text = soup.get_text(
+            " ",
+            strip=True
+        )
+
+
+        print(
+            text[:500]
+        )
+
+
+    else:
+
+        print(
+            "Failed"
+        )
