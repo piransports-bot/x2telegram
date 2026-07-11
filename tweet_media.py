@@ -1,12 +1,10 @@
-import requests
 import re
+import requests
 
 
 headers = {
-    "User-Agent":
-    "Mozilla/5.0"
+    "User-Agent": "Mozilla/5.0"
 }
-
 
 
 def get_media(url):
@@ -24,19 +22,33 @@ def get_media(url):
 
 
         if response.status_code != 200:
-
             return media
-
 
 
         html = response.text
 
 
+        # ویدیوهای واقعی X
 
-        # پیدا کردن عکس‌ها
+        videos = re.findall(
+            r'https://video\.twimg\.com/[^"\\]+\.mp4',
+            html
+        )
+
+
+        for video in videos:
+
+            video = video.replace("\\u0026","&")
+
+            if video not in media:
+                media.append(video)
+
+
+
+        # عکس‌ها
 
         images = re.findall(
-            r'https://pbs\.twimg\.com/media/[^"\?]+',
+            r'https://pbs\.twimg\.com/media/[^"\\?]+',
             html
         )
 
@@ -44,28 +56,8 @@ def get_media(url):
         for image in images:
 
             if image not in media:
+                media.append(image)
 
-                media.append(
-                    image
-                )
-
-
-
-        # پیدا کردن ویدیو
-
-        videos = re.findall(
-            r'https://video\.twimg\.com/[^"\s]+',
-            html
-        )
-
-
-        for video in videos:
-
-            if video not in media:
-
-                media.append(
-                    video
-                )
 
 
         return media
@@ -75,8 +67,8 @@ def get_media(url):
     except Exception as e:
 
         print(
-            "Media error:",
+            "Media Error:",
             e
         )
 
-        return media
+        return []
