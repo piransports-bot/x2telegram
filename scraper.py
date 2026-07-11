@@ -3,6 +3,7 @@ import requests
 
 from tweet_parser import extract_tweet
 from tweet_details import get_tweet_details
+from tweet_media import get_media
 
 
 accounts = [
@@ -13,46 +14,65 @@ accounts = [
 
 
 headers = {
-    "User-Agent":
-    "Mozilla/5.0"
+    "User-Agent": (
+        "Mozilla/5.0 "
+        "(Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 "
+        "Chrome/120 Safari/537.36"
+    )
 }
-
 
 
 def get_account_page(username):
 
     url = f"https://x.com/{username}"
 
+    try:
 
-    response = requests.get(
-        url,
-        headers=headers,
-        timeout=20
-    )
-
-
-    if response.status_code == 200:
-
-        return response.text
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=20
+        )
 
 
-    return None
+        print(
+            "Checking:",
+            username
+        )
+
+
+        print(
+            "Status:",
+            response.status_code
+        )
+
+
+        if response.status_code == 200:
+
+            return response.text
+
+
+        return None
+
+
+    except Exception as e:
+
+        print(
+            "Account page error:",
+            e
+        )
+
+        return None
 
 
 
 def main():
 
-
     results = []
 
 
     for account in accounts:
-
-
-        print(
-            "\nChecking:",
-            account
-        )
 
 
         html = get_account_page(
@@ -61,6 +81,7 @@ def main():
 
 
         if not html:
+
             continue
 
 
@@ -80,12 +101,24 @@ def main():
 
             if details:
 
+
                 details["user"] = account
+
+
+                details["media"] = get_media(
+                    details["url"]
+                )
+
 
                 results.append(
                     details
                 )
 
+
+
+    print(
+        "\n========== FINAL RESULT ==========\n"
+    )
 
 
     print(
@@ -99,4 +132,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
