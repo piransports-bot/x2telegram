@@ -1,39 +1,29 @@
-import json
 import os
+import requests
 
 
-FILE="sent_tweets.json"
-
-
-
-def load():
-
-    if not os.path.exists(FILE):
-        return []
-
-
-    with open(FILE,"r") as f:
-        return json.load(f)
+WORKER_URL = os.getenv(
+    "WORKER_URL"
+)
 
 
 
-def exists(tweet_id):
-
-    data=load()
-
-    return tweet_id in data
+def check_tweet(tweet_id):
 
 
+    response = requests.post(
+        WORKER_URL,
+        json={
+            "tweet_id": tweet_id
+        },
+        timeout=20
+    )
 
-def save(tweet_id):
 
-    data=load()
-
-    data.append(tweet_id)
+    data = response.json()
 
 
-    with open(FILE,"w") as f:
-        json.dump(
-            data,
-            f
-        )
+    return data.get(
+        "sent",
+        False
+    )
