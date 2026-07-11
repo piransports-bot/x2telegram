@@ -9,11 +9,8 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 def send_message(text):
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-
-
     requests.post(
-        url,
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
         json={
             "chat_id": CHAT_ID,
             "text": text,
@@ -25,11 +22,8 @@ def send_message(text):
 
 def send_photo(photo, caption):
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
-
-
     requests.post(
-        url,
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
         json={
             "chat_id": CHAT_ID,
             "photo": photo,
@@ -42,11 +36,8 @@ def send_photo(photo, caption):
 
 def send_video(video, caption):
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendVideo"
-
-
     requests.post(
-        url,
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendVideo",
         json={
             "chat_id": CHAT_ID,
             "video": video,
@@ -83,26 +74,45 @@ def send_tweet(tweet):
 
 
 
-    first = media[0]
+    # پیدا کردن MP4 واقعی
+
+    video = None
+
+    photo = None
 
 
-    # تشخیص واقعی ویدیو
+    for item in media:
 
-    if (
-        "video.twimg.com" in first
-        or
-        ".mp4" in first
-    ):
+        if ".mp4" in item:
+
+            video = item
+            break
+
+
+        if "pbs.twimg.com" in item:
+
+            photo = item
+
+
+
+    if video:
 
         send_video(
-            first,
+            video,
+            caption
+        )
+
+
+    elif photo:
+
+        send_photo(
+            photo,
             caption
         )
 
 
     else:
 
-        send_photo(
-            first,
+        send_message(
             caption
         )
