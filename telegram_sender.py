@@ -48,20 +48,73 @@ def send_video(video, caption):
 
 
 
+def send_album(photos, caption):
+
+
+    media = []
+
+
+    for index, photo in enumerate(photos):
+
+        item = {
+
+            "type": "photo",
+
+            "media": photo
+
+        }
+
+
+        # کپشن فقط روی عکس اول
+
+        if index == 0:
+
+            item["caption"] = caption
+
+            item["parse_mode"] = "HTML"
+
+
+
+        media.append(item)
+
+
+
+    requests.post(
+
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMediaGroup",
+
+        json={
+
+            "chat_id": CHAT_ID,
+
+            "media": media
+
+        }
+
+    )
+
+
+
 def send_tweet(tweet):
 
 
     caption = (
+
         f"🏎 <b>{tweet['user']}</b>\n\n"
+
         f"{tweet['text']}\n\n"
+
         f"🔗 {tweet['url']}"
+
     )
+
 
 
     media = tweet.get(
         "media",
         []
     )
+
 
 
     if not media:
@@ -74,45 +127,88 @@ def send_tweet(tweet):
 
 
 
-    # پیدا کردن MP4 واقعی
+    videos = []
 
-    video = None
+    photos = []
 
-    photo = None
 
 
     for item in media:
 
+
         if ".mp4" in item:
 
-            video = item
-            break
+            videos.append(
+                item
+            )
 
 
-        if "pbs.twimg.com" in item:
+        elif "pbs.twimg.com" in item:
 
-            photo = item
+            # حذف تکراری های jpg
+
+            clean = item.split("?")[0]
+
+
+            if clean not in photos:
+
+                photos.append(
+                    clean
+                )
 
 
 
-    if video:
+    # اگر ویدیو وجود داشت
+
+    if videos:
+
 
         send_video(
-            video,
+
+            videos[0],
+
             caption
+
         )
 
+        return
 
-    elif photo:
+
+
+    # اگر چند عکس بود
+
+    if len(photos) > 1:
+
+
+        send_album(
+
+            photos,
+
+            caption
+
+        )
+
+        return
+
+
+
+    # یک عکس
+
+    if len(photos) == 1:
+
 
         send_photo(
-            photo,
+
+            photos[0],
+
             caption
+
         )
 
+        return
 
-    else:
 
-        send_message(
-            caption
-        )
+
+    send_message(
+        caption
+    )
