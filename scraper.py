@@ -4,6 +4,7 @@ import requests
 from tweet_parser import extract_tweet
 from tweet_details import get_tweet_details
 from tweet_media import get_media
+from telegram_sender import send_tweet
 
 
 accounts = [
@@ -35,17 +36,8 @@ def get_account_page(username):
             timeout=20
         )
 
-
-        print(
-            "Checking:",
-            username
-        )
-
-
-        print(
-            "Status:",
-            response.status_code
-        )
+        print("\nChecking:", username)
+        print("Status:", response.status_code)
 
 
         if response.status_code == 200:
@@ -99,34 +91,58 @@ def main():
             )
 
 
-            if details:
+            if not details:
+
+                continue
 
 
-                details["user"] = account
+
+            details["user"] = account
 
 
-                details["media"] = get_media(
-                    details["url"]
+
+            details["media"] = get_media(
+                details["url"]
+            )
+
+
+
+            results.append(
+                details
+            )
+
+
+            print(
+                "\nTweet Found:"
+            )
+
+
+            print(
+                json.dumps(
+                    details,
+                    indent=2,
+                    ensure_ascii=False
                 )
+            )
 
 
-                results.append(
-                    details
-                )
+
+            # ارسال به تلگرام
+
+            send_tweet(
+                details
+            )
 
 
 
     print(
-        "\n========== FINAL RESULT ==========\n"
+        "\n========== TOTAL =========="
     )
 
 
     print(
-        json.dumps(
-            results,
-            indent=2,
-            ensure_ascii=False
-        )
+        len(results),
+        "tweets processed"
     )
 
 
