@@ -1,0 +1,37 @@
+name: X Scraper
+
+
+on:
+
+  schedule:
+
+    - cron: "*/5 * * * *"
+
+
+  workflow_dispatch:
+
+
+
+jobs:
+
+  scrape:
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+    - name:
+        Checkout
+
+      uses:
+        actions/checkout@v4
+
+
+
+    - name:
+        Run scraper
+
+      run:
+
+        python scraper.py
