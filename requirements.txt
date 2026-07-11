@@ -1,2 +1,3 @@
-snscrape
 requests
+beautifulsoup4
+lxml
