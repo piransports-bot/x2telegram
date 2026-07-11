@@ -1,5 +1,4 @@
 import re
-import json
 
 
 def extract_tweet(html):
@@ -8,26 +7,27 @@ def extract_tweet(html):
 
 
     urls = re.findall(
-        r'https://x\.com/[^"]+/status/\d+',
+        r'https://x\.com/[^"\s]+/status/\d+',
         html
     )
 
 
+    # حذف تکراری‌ها با حفظ ترتیب
+
+    seen = set()
+
+
     for url in urls:
 
-        tweets.append({
+        if url not in seen:
 
-            "url": url
+            seen.add(url)
 
-        })
-
-
-    return tweets
-
+            tweets.append({
+                "url": url
+            })
 
 
-if __name__ == "__main__":
+    # فقط 10 توییت آخر
 
-    print(
-        "Parser Ready"
-    )
+    return tweets[:10]
