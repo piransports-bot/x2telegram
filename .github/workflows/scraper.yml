@@ -1,37 +1,41 @@
 name: X Scraper
 
-
 on:
-
   schedule:
-
+    # اجرا هر 5 دقیقه
     - cron: "*/5 * * * *"
 
-
+  # اجرای دستی از بخش Actions
   workflow_dispatch:
 
 
-
 jobs:
-
   scrape:
 
     runs-on: ubuntu-latest
 
-
     steps:
 
-    - name:
-        Checkout
-
-      uses:
-        actions/checkout@v4
+      # دریافت کدهای Repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
 
+      # نصب Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name:
-        Run scraper
 
-      run:
+      # نصب کتابخانه‌ها
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-        python scraper.py
+
+      # اجرای Scraper
+      - name: Run X Scraper
+        run: |
+          python scraper.py
