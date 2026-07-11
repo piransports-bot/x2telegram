@@ -6,6 +6,7 @@ from tweet_details import get_tweet_details
 from tweet_media import get_media
 from telegram_sender import send_tweet
 from tweet_cache import check_tweet
+from telegram_error import send_error
 
 
 headers = {
@@ -16,6 +17,7 @@ headers = {
         "Chrome/120 Safari/537.36"
     )
 }
+
 
 
 def load_accounts():
@@ -34,163 +36,194 @@ def get_account_page(username):
 
     url = f"https://x.com/{username}"
 
-    try:
 
-        response = requests.get(
-            url,
-            headers=headers,
-            timeout=20
-        )
-
-        print(
-            "\nChecking:",
-            username
-        )
-
-        print(
-            "Status:",
-            response.status_code
-        )
-
-
-        if response.status_code == 200:
-
-            return response.text
-
-
-        return None
-
-
-    except Exception as e:
-
-        print(
-            "Page error:",
-            e
-        )
-
-        return None
-
-
-
-def main():
-
-    results = []
-
-
-    accounts = load_accounts()
-
-
-    print(
-        "Accounts loaded:",
-        len(accounts)
+    response = requests.get(
+        url,
+        headers=headers,
+        timeout=20
     )
 
 
-    for account in accounts:
+    print(
+        "\nChecking:",
+        username
+    )
 
 
-        html = get_account_page(
-            account
+    print(
+        "Status:",
+        response.status_code
+    )
+
+
+    if response.status_code == 200:
+
+        return response.text
+
+
+    return None
+
+
+
+def process_account(account):
+
+
+    html = get_account_page(
+        account
+    )
+
+
+    if not html:
+
+        return 0
+
+
+
+    tweets = extract_tweet(
+        html
+    )
+
+
+    sent_count = 0
+
+
+
+    for tweet in tweets:
+
+
+        details = get_tweet_details(
+            tweet["url"]
         )
 
 
-        if not html:
+        if not details:
 
             continue
 
 
 
-        tweets = extract_tweet(
-            html
+        details["user"] = account
+
+
+
+        details["media"] = get_media(
+            details["url"]
         )
 
 
 
-        for tweet in tweets:
-
-
-            details = get_tweet_details(
-                tweet["url"]
-            )
-
-
-            if not details:
-
-                continue
+        tweet_id = (
+            details["url"]
+            .split("/")
+            [-1]
+        )
 
 
 
-            details["user"] = account
+        print(
+            "\nChecking tweet:",
+            tweet_id
+        )
 
 
 
-            details["media"] = get_media(
-                details["url"]
-            )
-
-
-
-            tweet_id = (
-                details["url"]
-                .split("/")
-                [-1]
-            )
-
+        if check_tweet(tweet_id):
 
 
             print(
-                "\nChecking tweet:",
+                "Already sent:",
                 tweet_id
             )
 
 
-
-            if check_tweet(tweet_id):
-
-                print(
-                    "Already sent:",
-                    tweet_id
-                )
-
-                continue
+            continue
 
 
 
-            print(
-                "\nNew tweet found:"
+        print(
+            "\nNew tweet:"
+        )
+
+
+        print(
+            json.dumps(
+                details,
+                indent=2,
+                ensure_ascii=False
+            )
+        )
+
+
+
+        send_tweet(
+            details
+        )
+
+
+        sent_count += 1
+
+
+
+    return sent_count
+
+
+
+
+def main():
+
+
+    try:
+
+
+        accounts = load_accounts()
+
+
+
+        print(
+            "Accounts loaded:",
+            len(accounts)
+        )
+
+
+
+        total_sent = 0
+
+
+
+        for account in accounts:
+
+
+            total_sent += process_account(
+                account
             )
 
 
-            print(
-                json.dumps(
-                    details,
-                    indent=2,
-                    ensure_ascii=False
-                )
-            )
+
+        print(
+            "\n========== DONE =========="
+        )
+
+
+        print(
+            "Total sent:",
+            total_sent
+        )
 
 
 
-            send_tweet(
-                details
-            )
+    except Exception as e:
 
 
-            results.append(
-                details
-            )
+        print(
+            "MAIN ERROR:",
+            e
+        )
 
 
+        send_error(
+            str(e)
+        )
 
-    print(
-        "\n========== DONE =========="
-    )
-
-
-    print(
-        "Sent:",
-        len(results)
-    )
 
 
 
