@@ -1,21 +1,29 @@
 name: X Scraper
 
+
 on:
 
   schedule:
-    - cron: "*/5 * * * *"
+
+    - cron: "* * * * *"
+
 
   workflow_dispatch:
 
 
+
 jobs:
 
+
   scrape:
+
 
     runs-on: ubuntu-latest
 
 
+
     env:
+
 
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
@@ -24,15 +32,20 @@ jobs:
       WORKER_URL: ${{ secrets.WORKER_URL }}
 
 
+
     steps:
 
 
+
       - name: Checkout repository
+
         uses: actions/checkout@v4
 
 
 
+
       - name: Setup Python
+
         uses: actions/setup-python@v5
 
         with:
@@ -41,7 +54,9 @@ jobs:
 
 
 
+
       - name: Install dependencies
+
         run: |
 
           python -m pip install --upgrade pip
@@ -50,7 +65,9 @@ jobs:
 
 
 
+
       - name: Run scraper
+
         run: |
 
           python scraper.py
